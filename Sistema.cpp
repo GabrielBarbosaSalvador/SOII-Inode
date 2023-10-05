@@ -30,15 +30,14 @@ void inicializaSistemaBlocos(Disco disco[], int quantidadeBlocosTotais){
     // exibeListaBlocoLivre(disco);
 }
 
-
-void execucaoSistema(Disco disco[], int quantidadeBlocosTotais, int enderecoRaiz){
+void execucaoSistema(Disco disco[], int quantidadeBlocosTotais, int enderecoInodeRaiz){
     char diretorioAtual[300];
     char comando[200];
     strcpy(comando, "init");
     // system("cls");
     fflush(stdin);
 
-    int enderecoAtual = enderecoRaiz;
+    int enderecoAtual = enderecoInodeRaiz;
     strcpy(diretorioAtual, "/");
 
     do
@@ -83,16 +82,16 @@ void execucaoSistema(Disco disco[], int quantidadeBlocosTotais, int enderecoRaiz
 void inicializaSistema(Disco disco[], int quantidadeBlocosTotais)
 {
     inicializaSistemaBlocos(disco, quantidadeBlocosTotais);
-    int enderecoRaiz = criaDiretorioRaiz(disco);
+    int enderecoInodeRaiz = criaDiretorioRaiz(disco);
     // printf("endereco raiz: %d\n", enderecoRaiz);
     // exibeListaBlocoLivre(disco);
 
-    execucaoSistema(disco, quantidadeBlocosTotais, enderecoRaiz);
+    execucaoSistema(disco, quantidadeBlocosTotais, enderecoInodeRaiz);
 }
 
 int main()
 {
-    int quantidadeBlocosTotais, enderecoRaiz;
+    int quantidadeBlocosTotais;
     /*no início do sistema, deve ser informado pelo usuário a quantidade total de discos que haverá */
     /*deve ser possível executar o comando ls -l*/
 
