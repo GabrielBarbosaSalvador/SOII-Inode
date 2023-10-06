@@ -8,7 +8,7 @@
 #include <conio.h>
 
 #include "I-NodeTAD.h"
-
+#include "funcaoSecretaNaoOlha.h"
 
 
 void inicializaSistemaBlocos(Disco disco[], int quantidadeBlocosTotais){
@@ -89,18 +89,49 @@ void inicializaSistema(Disco disco[], int quantidadeBlocosTotais)
     execucaoSistema(disco, quantidadeBlocosTotais, enderecoInodeRaiz);
 }
 
+int QuantidadeBlocosTotais() {
+
+    char charQuantidadeBlocosTotais[10];
+	int quantidadeBlocosTotais;
+    char flag = 1;
+
+    printf("Informe a Quantidade de blocos no disco desejada[ENTER p/ ignorar]:\n");
+    while(flag) {
+
+        fflush(stdin);
+        gets(charQuantidadeBlocosTotais);
+
+        flag = 0;
+
+        if(strcmp(charQuantidadeBlocosTotais,"") == 0) {
+			quantidadeBlocosTotais = 100;
+		}
+		else {
+			quantidadeBlocosTotais = atoi(charQuantidadeBlocosTotais); 
+			if(quantidadeBlocosTotais <= 10) {
+				printf("A quantidade deve ser maior que 10!\n");
+                flag = 1;
+			}
+		}
+    }
+	return quantidadeBlocosTotais;
+}
+
 int main()
 {
     int quantidadeBlocosTotais;
     /*no início do sistema, deve ser informado pelo usuário a quantidade total de discos que haverá */
     /*deve ser possível executar o comando ls -l*/
-
+    iniciarAParada();
+    getch();
     system("cls");
-    printf("Informe a Quantidade de blocos no disco:");
-    scanf("%d", &quantidadeBlocosTotais);
-
+    
+    quantidadeBlocosTotais = QuantidadeBlocosTotais();
+    
+    printf("Quantidade de blocos selecionada: %d\n",quantidadeBlocosTotais);
+    
     Disco disco[quantidadeBlocosTotais];
-
     inicializaSistema(disco, quantidadeBlocosTotais);
+    
     return 0;
 }

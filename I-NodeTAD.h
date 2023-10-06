@@ -269,6 +269,11 @@ void exibeListaBlocoLivre(Disco disco[])
     }
 }
 
+void addExibicaoEndereco(exibicaoEndereco enderecos[], int &TL, int endereco, char info){
+    enderecos[TL].endereco = endereco;
+    enderecos[TL++].info = info;
+}
+
 int criarINodeIndireto(Disco disco[])
 {
     int blocoLivreInodeIndireto = popListaBlocoLivre(disco);
@@ -280,7 +285,8 @@ int criarINodeIndireto(Disco disco[])
     return blocoLivreInodeIndireto;
 }
 
-void inserirInodeIndiretoSimples(Disco disco[], int enderecoInodeIndireto, int &quantidadeBlocosNecessarios, int enderecoInodePrincipal, int enderecosAlocados[], int &tlEnderecosAlocados,int InseridoPeloTriplo=0)
+//utilizado para inserir ao criar o inode
+void inserirInodeIndiretoSimples(Disco disco[], int enderecoInodeIndireto, int &quantidadeBlocosNecessarios, int enderecoInodePrincipal, int InseridoPeloTriplo=0)
 {
     int quantidadeBlocosUtilizados = 0;
     //verifica se a quantidade de endereços no inode indireto não está cheio
@@ -293,8 +299,6 @@ void inserirInodeIndiretoSimples(Disco disco[], int enderecoInodeIndireto, int &
             disco[enderecoInodeIndireto].inodeIndireto.endereco[inicio] = popListaBlocoLivre(disco);
             disco[enderecoInodeIndireto].inodeIndireto.TL++;
             
-            enderecosAlocados[tlEnderecosAlocados++] = disco[enderecoInodeIndireto].inodeIndireto.endereco[inicio];
-
             quantidadeBlocosUtilizados++;
             inicio++;
         }
@@ -321,13 +325,13 @@ void inserirInodeIndiretoSimples(Disco disco[], int enderecoInodeIndireto, int &
 
         //conseguiu criar o inode
         if(isEnderecoValido(disco[enderecoInodeIndireto].inodeIndireto.endereco[disco[enderecoInodeIndireto].inodeIndireto.TL])){
-            enderecosAlocados[tlEnderecosAlocados++] = disco[enderecoInodeIndireto].inodeIndireto.endereco[disco[enderecoInodeIndireto].inodeIndireto.TL];
             disco[enderecoInodeIndireto].inodeIndireto.TL++;
         }
     }
 }
 
-void inserirInodeIndiretoDuplo(Disco disco[], int enderecoInodeIndireto, int &quantidadeBlocosNecessarios, int enderecoInodePrincipal, int enderecosAlocados[], int &tlEnderecosAlocados, int InseridoPeloTriplo=0)
+//utilizado para inserir ao criar o inode
+void inserirInodeIndiretoDuplo(Disco disco[], int enderecoInodeIndireto, int &quantidadeBlocosNecessarios, int enderecoInodePrincipal,  int InseridoPeloTriplo=0)
 {
     //verifica se a quantidade de endereços no inode indireto não está cheio
     if (disco[enderecoInodeIndireto].inodeIndireto.TL < MAX_INODEINDIRETO)
@@ -345,8 +349,6 @@ void inserirInodeIndiretoDuplo(Disco disco[], int enderecoInodeIndireto, int &qu
                                         disco[enderecoInodeIndireto].inodeIndireto.endereco[inicio], 
                                         quantidadeBlocosNecessarios,
                                         enderecoInodePrincipal,
-                                        enderecosAlocados,
-                                        tlEnderecosAlocados,
                                         InseridoPeloTriplo && inicio + 1 == MAX_INODEINDIRETO);
             
             disco[enderecoInodeIndireto].inodeIndireto.TL++;
@@ -355,7 +357,8 @@ void inserirInodeIndiretoDuplo(Disco disco[], int enderecoInodeIndireto, int &qu
     }
 }
 
-void inserirInodeIndiretoTriplo(Disco disco[], int enderecoInodeIndireto, int &quantidadeBlocosNecessarios, int enderecoInodePrincipal, int enderecosAlocados[], int &tlEnderecosAlocados)
+//utilizado para inserir ao criar o inode
+void inserirInodeIndiretoTriplo(Disco disco[], int enderecoInodeIndireto, int &quantidadeBlocosNecessarios, int enderecoInodePrincipal)
 {
     //verifica se a quantidade de endereços no inode indireto não está cheio
     if (disco[enderecoInodeIndireto].inodeIndireto.TL < MAX_INODEINDIRETO)
@@ -373,8 +376,6 @@ void inserirInodeIndiretoTriplo(Disco disco[], int enderecoInodeIndireto, int &q
                                         disco[enderecoInodeIndireto].inodeIndireto.endereco[inicio], 
                                         quantidadeBlocosNecessarios,
                                         enderecoInodePrincipal,
-                                        enderecosAlocados,
-                                        tlEnderecosAlocados,
                                         1);
             
             disco[enderecoInodeIndireto].inodeIndireto.TL++;
@@ -383,9 +384,64 @@ void inserirInodeIndiretoTriplo(Disco disco[], int enderecoInodeIndireto, int &q
     }
 }
 
+//utilizado para exibir o disco
+void percorrerInodeIndiretoSimples(Disco disco[], int enderecoInodeIndireto,  exibicaoEndereco enderecos[], int &TL, int ChamadoPeloTriplo=0)
+{
+    
+    //verifica se a quantidade de endereços no inode indireto não está cheio
+    if (disco[enderecoInodeIndireto].inodeIndireto.TL > 0)
+    {
+        int inicio = 0;
+        //adiciona novos blocos enquanto a quantidade for menor que o necessário e que não esteja cheio
+        while (inicio < disco[enderecoInodeIndireto].inodeIndireto.TL && inicio < MAX_INODEINDIRETO - ChamadoPeloTriplo)
+        {            
+            addExibicaoEndereco(enderecos, TL, disco[enderecoInodeIndireto].inodeIndireto.endereco[inicio], 'A'); 
+            inicio++;
+        }
+        
+    }
+}
+
+//utilizado para exibir o disco
+void percorrerInodeIndiretoDuplo(Disco disco[], int enderecoInodeIndireto,  exibicaoEndereco enderecos[], int &TL, int ChamadoPeloTriplo=0)
+{
+    
+    //verifica se a quantidade de endereços no inode indireto não está cheio
+    if (disco[enderecoInodeIndireto].inodeIndireto.TL > 0)
+    {
+        int inicio = 0;
+        //adiciona novos blocos enquanto a quantidade for menor que o necessário e que não esteja cheio
+        while (inicio < disco[enderecoInodeIndireto].inodeIndireto.TL && inicio < MAX_INODEINDIRETO)
+        {            
+            addExibicaoEndereco(enderecos, TL, disco[enderecoInodeIndireto].inodeIndireto.endereco[inicio], 'I'); 
+            percorrerInodeIndiretoSimples(disco, disco[enderecoInodeIndireto].inodeIndireto.endereco[inicio], enderecos, TL, ChamadoPeloTriplo && inicio + 1 == MAX_INODEINDIRETO);
+            inicio++;
+        }
+        
+    }
+}
+
+//utilizado para exibir o disco
+void percorrerInodeIndiretoTriplo(Disco disco[], int enderecoInodeIndireto,  exibicaoEndereco enderecos[], int &TL)
+{
+    
+    //verifica se a quantidade de endereços no inode indireto não está cheio
+    if (disco[enderecoInodeIndireto].inodeIndireto.TL > 0)
+    {
+        int inicio = 0;
+        //adiciona novos blocos enquanto a quantidade for menor que o necessário e que não esteja cheio
+        while (inicio < disco[enderecoInodeIndireto].inodeIndireto.TL && inicio < MAX_INODEINDIRETO)
+        {            
+            addExibicaoEndereco(enderecos, TL, disco[enderecoInodeIndireto].inodeIndireto.endereco[inicio], 'I'); 
+            percorrerInodeIndiretoDuplo(disco, disco[enderecoInodeIndireto].inodeIndireto.endereco[inicio], enderecos, TL, 1);
+            inicio++;
+        }
+        
+    }
+}
+
 int criarINode(Disco disco[], char tipoArquivo, char permissao[10], int tamanhoArquivo = 1)
 {
-    int enderecosUtilizados[1000], tlEnderecosUtilizados=0;
     int quantidadeBlocosNecessarios = (int)ceil((double)tamanhoArquivo / (double)10);
 
     //quantidade de blocos necessárias é maior que a quantidade de blocos livres. Se for, não posso gerar o arquivo, então retorna "-1"
@@ -441,7 +497,7 @@ int criarINode(Disco disco[], char tipoArquivo, char permissao[10], int tamanhoA
             {
                 disco[enderecoInode].inode.enderecoSimplesIndireto = criarINodeIndireto(disco);
             }
-            inserirInodeIndiretoSimples(disco, disco[enderecoInode].inode.enderecoSimplesIndireto, enderecoInode, quantidadeBlocosFaltantes, enderecosUtilizados, tlEnderecosUtilizados);
+            inserirInodeIndiretoSimples(disco, disco[enderecoInode].inode.enderecoSimplesIndireto, enderecoInode, quantidadeBlocosFaltantes);
         }
 
         if (quantidadeBlocosFaltantes > 0)
@@ -450,7 +506,7 @@ int criarINode(Disco disco[], char tipoArquivo, char permissao[10], int tamanhoA
             {
                 disco[enderecoInode].inode.enderecoDuploIndireto = criarINodeIndireto(disco);
             }
-            inserirInodeIndiretoDuplo(disco, disco[enderecoInode].inode.enderecoDuploIndireto, enderecoInode, quantidadeBlocosFaltantes, enderecosUtilizados, tlEnderecosUtilizados);
+            inserirInodeIndiretoDuplo(disco, disco[enderecoInode].inode.enderecoDuploIndireto, enderecoInode, quantidadeBlocosFaltantes);
         }
 
         if (quantidadeBlocosFaltantes > 0)
@@ -459,7 +515,7 @@ int criarINode(Disco disco[], char tipoArquivo, char permissao[10], int tamanhoA
             {
                 disco[enderecoInode].inode.enderecoTriploIndireto = criarINodeIndireto(disco);
             }
-            inserirInodeIndiretoTriplo(disco, disco[enderecoInode].inode.enderecoTriploIndireto, enderecoInode, quantidadeBlocosFaltantes, enderecosUtilizados, tlEnderecosUtilizados);
+            inserirInodeIndiretoTriplo(disco, disco[enderecoInode].inode.enderecoTriploIndireto, enderecoInode, quantidadeBlocosFaltantes);
         }
         
     }
@@ -526,32 +582,32 @@ int criaDiretorio(Disco disco[], int enderecoInodeDiretorioAtual, char nomeDiret
     {
         int quantidadeBlocosFaltantes = 1;
 
-        if (quantidadeBlocosFaltantes > 0)
-        {
-            if (isEnderecoNull(disco[enderecoInodeDiretorioAtual].inode.enderecoSimplesIndireto))
-            {
-                disco[enderecoInodeDiretorioAtual].inode.enderecoSimplesIndireto = criarINodeIndireto(disco);
-            }
-            inserirInodeIndiretoSimples(disco, disco[enderecoInodeDiretorioAtual].inode.enderecoSimplesIndireto, enderecoInodeDiretorioAtual, quantidadeBlocosFaltantes, enderecosUtilizados, tlEnderecosUtilizados);
-        }
+        // if (quantidadeBlocosFaltantes > 0)
+        // {
+        //     if (isEnderecoNull(disco[enderecoInodeDiretorioAtual].inode.enderecoSimplesIndireto))
+        //     {
+        //         disco[enderecoInodeDiretorioAtual].inode.enderecoSimplesIndireto = criarINodeIndireto(disco);
+        //     }
+        //     inserirInodeIndiretoSimples(disco, disco[enderecoInodeDiretorioAtual].inode.enderecoSimplesIndireto, enderecoInodeDiretorioAtual, quantidadeBlocosFaltantes);
+        // }
 
-        if (quantidadeBlocosFaltantes > 0)
-        {
-            if (isEnderecoNull(disco[enderecoInodeDiretorioAtual].inode.enderecoDuploIndireto))
-            {
-                disco[enderecoInodeDiretorioAtual].inode.enderecoDuploIndireto = criarINodeIndireto(disco);
-            }
-            inserirInodeIndiretoDuplo(disco, disco[enderecoInodeDiretorioAtual].inode.enderecoDuploIndireto, enderecoInodeDiretorioAtual, quantidadeBlocosFaltantes, enderecosUtilizados, tlEnderecosUtilizados);
-        }
+        // if (quantidadeBlocosFaltantes > 0)
+        // {
+        //     if (isEnderecoNull(disco[enderecoInodeDiretorioAtual].inode.enderecoDuploIndireto))
+        //     {
+        //         disco[enderecoInodeDiretorioAtual].inode.enderecoDuploIndireto = criarINodeIndireto(disco);
+        //     }
+        //     inserirInodeIndiretoDuplo(disco, disco[enderecoInodeDiretorioAtual].inode.enderecoDuploIndireto, enderecoInodeDiretorioAtual, quantidadeBlocosFaltantes);
+        // }
 
-        if (quantidadeBlocosFaltantes > 0)
-        {
-            if (isEnderecoNull(disco[enderecoInodeDiretorioAtual].inode.enderecoTriploIndireto))
-            {
-                disco[enderecoInodeDiretorioAtual].inode.enderecoTriploIndireto = criarINodeIndireto(disco);
-            }
-            inserirInodeIndiretoTriplo(disco, disco[enderecoInodeDiretorioAtual].inode.enderecoTriploIndireto, enderecoInodeDiretorioAtual, quantidadeBlocosFaltantes, enderecosUtilizados, tlEnderecosUtilizados);
-        }
+        // if (quantidadeBlocosFaltantes > 0)
+        // {
+        //     if (isEnderecoNull(disco[enderecoInodeDiretorioAtual].inode.enderecoTriploIndireto))
+        //     {
+        //         disco[enderecoInodeDiretorioAtual].inode.enderecoTriploIndireto = criarINodeIndireto(disco);
+        //     }
+        //     inserirInodeIndiretoTriplo(disco, disco[enderecoInodeDiretorioAtual].inode.enderecoTriploIndireto, enderecoInodeDiretorioAtual, quantidadeBlocosFaltantes);
+        // }
 
         //não conseguiu criar nenhum endereço
         if (tlEnderecosUtilizados == 0)
@@ -629,11 +685,6 @@ int criaDiretorioRaiz(Disco disco[])
     return enderecoInodeDiretorioRaiz;
 }
 
-void addExibicaoEndereco(exibicaoEndereco enderecos[], int &TL, int endereco, char info){
-    enderecos[TL].endereco = endereco;
-    enderecos[TL++].info = info;
-}
-
 void quickSort(int ini, int fim, exibicaoEndereco vet[]) {
 	int i = ini;
 	int j = fim;
@@ -671,59 +722,6 @@ void quickSort(int ini, int fim, exibicaoEndereco vet[]) {
 	
 	if(j+1 < fim)
 		quickSort(j+1, fim, vet);
-}
-
-void percorrerInodeIndiretoSimples(Disco disco[], int enderecoInodeIndireto,  exibicaoEndereco enderecos[], int &TL, int ChamadoPeloTriplo=0)
-{
-    
-    //verifica se a quantidade de endereços no inode indireto não está cheio
-    if (disco[enderecoInodeIndireto].inodeIndireto.TL > 0)
-    {
-        int inicio = 0;
-        //adiciona novos blocos enquanto a quantidade for menor que o necessário e que não esteja cheio
-        while (inicio < disco[enderecoInodeIndireto].inodeIndireto.TL && inicio < MAX_INODEINDIRETO - ChamadoPeloTriplo)
-        {            
-            addExibicaoEndereco(enderecos, TL, disco[enderecoInodeIndireto].inodeIndireto.endereco[inicio], 'A'); 
-            inicio++;
-        }
-        
-    }
-}
-
-void percorrerInodeIndiretoDuplo(Disco disco[], int enderecoInodeIndireto,  exibicaoEndereco enderecos[], int &TL, int ChamadoPeloTriplo=0)
-{
-    
-    //verifica se a quantidade de endereços no inode indireto não está cheio
-    if (disco[enderecoInodeIndireto].inodeIndireto.TL > 0)
-    {
-        int inicio = 0;
-        //adiciona novos blocos enquanto a quantidade for menor que o necessário e que não esteja cheio
-        while (inicio < disco[enderecoInodeIndireto].inodeIndireto.TL && inicio < MAX_INODEINDIRETO)
-        {            
-            addExibicaoEndereco(enderecos, TL, disco[enderecoInodeIndireto].inodeIndireto.endereco[inicio], 'I'); 
-            percorrerInodeIndiretoSimples(disco, disco[enderecoInodeIndireto].inodeIndireto.endereco[inicio], enderecos, TL, ChamadoPeloTriplo && inicio + 1 == MAX_INODEINDIRETO);
-            inicio++;
-        }
-        
-    }
-}
-
-void percorrerInodeIndiretoTriplo(Disco disco[], int enderecoInodeIndireto,  exibicaoEndereco enderecos[], int &TL)
-{
-    
-    //verifica se a quantidade de endereços no inode indireto não está cheio
-    if (disco[enderecoInodeIndireto].inodeIndireto.TL > 0)
-    {
-        int inicio = 0;
-        //adiciona novos blocos enquanto a quantidade for menor que o necessário e que não esteja cheio
-        while (inicio < disco[enderecoInodeIndireto].inodeIndireto.TL && inicio < MAX_INODEINDIRETO)
-        {            
-            addExibicaoEndereco(enderecos, TL, disco[enderecoInodeIndireto].inodeIndireto.endereco[inicio], 'I'); 
-            percorrerInodeIndiretoDuplo(disco, disco[enderecoInodeIndireto].inodeIndireto.endereco[inicio], enderecos, TL, 1);
-            inicio++;
-        }
-        
-    }
 }
 
 void exibirDisco(Disco disco[], int tamanhoDisco, int quantidadeBlocosNecessariosListaLivre)
