@@ -95,6 +95,16 @@ void execucaoSistema(Disco disco[], int quantidadeBlocosTotais, int enderecoInod
             if (comando.size() > 6)
                 touch(disco, enderecoInodeAtual, comando.substr(6));
         }
+        else if(strcmp(comando.substr(0, 2).c_str(), "df") == 0)
+        {
+            int qtdBlocosLivres=0, qtdBlocosOcupados=0;
+            float porcentagemBlocosUsados;
+            buscaBlocosLivresOcupados(disco, qtdBlocosLivres, qtdBlocosOcupados, quantidadeBlocosTotais, quantidadeBlocosTotais / QUANTIDADE_LIMITE_ENDERECO_LISTA_BLOCO_LIVRE);
+
+            porcentagemBlocosUsados = (float) qtdBlocosOcupados/quantidadeBlocosTotais;
+            printf("Filesystem\tTamanho\tUsados\tDisponivel\tUso%\t\tMontado em\n");
+            printf("/dev/sda1\t%d\t%d\t%d\t\t%.2f%%\t\t/\n", quantidadeBlocosTotais, qtdBlocosOcupados,qtdBlocosLivres, porcentagemBlocosUsados*100);
+        }
         else if (strcmp(comando.c_str(), "trace disk") == 0)
         {
             printf("\n");
