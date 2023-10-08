@@ -1,8 +1,5 @@
 
 
-
-
-
 void iniciarAParada() {
 	printf("        --*:-*#*:::***$-:.++             .d8888b.           888\n");
 	printf("       @@Y ..--Y*.**#*--.    @@--       d88P  Y88b          888\n");
