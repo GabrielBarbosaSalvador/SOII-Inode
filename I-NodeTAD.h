@@ -132,6 +132,7 @@ int getQuantidadeBlocosUsar(Disco disco[], int quantidadeBlocosNecessarios);
 void vi(Disco disco[], int enderecoInodeAtual, string nomeArquivo, string &enderecosUtilizados);
 bool rm(Disco disco[], int enderecoInodeAtual, string nomeArquivo, int primeiraVez);
 bool rmdir(Disco disco[], int enderecoInodeAtual, string nomeDiretorio, int &contadorDiretorio, int primeiraVez);
+int cd(Disco disco[], int enderecoInodeAtual, string nomeDiretorio, int enderecoInodeRaiz, string &caminhoAbsoluto);
 
 string getNomeProprietario(int proprietarioCod)
 {
@@ -1743,7 +1744,7 @@ void listarDiretorioComAtributos(Disco disco[], int enderecoInodeAtual)
             if (disco[enderecoInodeArquivo].inode.protecao[0] == TIPO_ARQUIVO_LINK)
             {
                 printf("%s -> %s\n", disco[disco[enderecoInodeAtual].inode.enderecoDireto[direto]].diretorio.arquivo[i].nome, 
-                                    disco[disco[disco[enderecoInodeAtual].inode.enderecoDireto[direto]].diretorio.arquivo[i].enderecoINode].ls.caminho.c_str());
+                                    disco[disco[disco[disco[enderecoInodeAtual].inode.enderecoDireto[direto]].diretorio.arquivo[i].enderecoINode].inode.enderecoDireto[0]].ls.caminho.c_str());
             }
             else
                 printf("%s\n", disco[disco[enderecoInodeAtual].inode.enderecoDireto[direto]].diretorio.arquivo[i].nome);
@@ -1798,6 +1799,7 @@ int cd(Disco disco[], int enderecoInodeAtual, string nomeDiretorio, int endereco
     }
     else
     {
+        
         endereco = existeArquivoOuDiretorio(disco, enderecoInodeAtual, nomeDiretorio, TIPO_ARQUIVO_DIRETORIO);
         if (isEnderecoValido(endereco))
         {
@@ -2195,6 +2197,7 @@ void linkSimbolico(Disco disco[], int enderecoInodeAtual, string comando, int en
     //  ../teste/teste1
     char caminhoDestinoChar[300];
     string caminhoExemplo;
+    string caminhoAux;
     vector<string> caminhosOrigemDestino, caminhoOrigem, caminhoDestino;
 
     caminhosOrigemDestino = split(comando, ' ');
@@ -2207,7 +2210,8 @@ void linkSimbolico(Disco disco[], int enderecoInodeAtual, string comando, int en
 
         strcpy(caminhoDestinoChar, caminhoDestino.at(0).c_str());
         // 
-        addDiretorioEArquivo(disco, TIPO_ARQUIVO_LINK, enderecoInodeAtual, caminhoDestinoChar, 1, caminhosOrigemDestino.at(0));
+        caminhoAux = caminhosOrigemDestino.at(0);
+        addDiretorioEArquivo(disco, TIPO_ARQUIVO_LINK, enderecoInodeAtual, caminhoDestinoChar, 1, caminhoAux);
         // int enderecoInodeOrigem = enderecoInodeAtual;
 
         // printf("\n");
