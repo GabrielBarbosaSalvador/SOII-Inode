@@ -62,26 +62,30 @@ void execucaoSistema(Disco disco[], int quantidadeBlocosTotais, int enderecoInod
         }
         else if (strcmp(comando.substr(0, 5).c_str(), "mkdir") == 0)
         {
-            char nomeDiretorio[MAX_NOME_ARQUIVO], nomeDiretorio1[MAX_NOME_ARQUIVO];
-            strcpy(nomeDiretorio1, "teste");
-            // strcpy(nomeDiretorio, comando.substr(6).c_str());            
-            // addDiretorioEArquivo(disco, 'd', enderecoInodeAtual, nomeDiretorio);
-            for(int i=0; i < 140; i++){
-                itoa(i, nomeDiretorio, 10);
-                strcpy(nomeDiretorio, strcat(nomeDiretorio1, nomeDiretorio));
+            char nomeDiretorio[MAX_NOME_ARQUIVO];
+            
+            if (comando.size() >= 6)
+            {
+                strcpy(nomeDiretorio, comando.substr(6).c_str()); 
                 
-                addDiretorioEArquivo(disco, 'd', enderecoInodeAtual, nomeDiretorio);
-                nomeDiretorio[0] = '\0';
-                strcpy(nomeDiretorio1, "teste");
+                if (isEnderecoValido(addDiretorioEArquivo(disco, 'd', enderecoInodeAtual, nomeDiretorio)))
+                {
+                    printf("Diretorio criado\n");
+                }
+                else
+                {
+                    printf("Nao foi possivel criar o diretorio\n");
+                }
             }
-        
-//        	printf("\n\n");                        
-            printf("Diretorio Criado: \n\n");                        
-
-//            for(int i=0; i < disco[enderecoInodeAtual].diretorio.TL; i++)
-//            {
-//                printf(" - %s\n", disco[enderecoInodeAtual].diretorio.arquivo[i]);
-//            }
+            // char nomeDiretorio1[MAX_NOME_ARQUIVO];
+            // strcpy(nomeDiretorio1, "teste");
+            // for(int i=0; i < 140; i++){
+            //     itoa(i, nomeDiretorio, 10);
+            //     strcpy(nomeDiretorio, strcat(nomeDiretorio1, nomeDiretorio));                
+            //     addDiretorioEArquivo(disco, 'd', enderecoInodeAtual, nomeDiretorio);
+            //     nomeDiretorio[0] = '\0';
+            //     strcpy(nomeDiretorio1, "teste");
+            // }
         }
         else if (strcmp(comando.substr(0, 2).c_str(), "cd") == 0)
         {
@@ -92,8 +96,14 @@ void execucaoSistema(Disco disco[], int quantidadeBlocosTotais, int enderecoInod
         }
         else if (strcmp(comando.substr(0, 5).c_str(), "touch") == 0)
         {
+            char touchString[300];
+            strcpy(touchString, comando.substr(6).c_str());
+
             if (comando.size() > 6)
-                touch(disco, enderecoInodeAtual, comando.substr(6));
+                if(touch(disco, enderecoInodeAtual, touchString))
+                    printf("Arquivo criado\n");
+                else
+                    printf("Nao foi possivel criar o arquivo\n");
         }
         else if(strcmp(comando.substr(0, 2).c_str(), "df") == 0)
         {
@@ -105,6 +115,47 @@ void execucaoSistema(Disco disco[], int quantidadeBlocosTotais, int enderecoInod
             printf("Filesystem\tTamanho\tUsados\tDisponivel\tUso%\t\tMontado em\n");
             printf("/dev/sda1\t%d\t%d\t%d\t\t%.2f%%\t\t/\n", quantidadeBlocosTotais, qtdBlocosOcupados,qtdBlocosLivres, porcentagemBlocosUsados*100);
         }
+        else if (strcmp(comando.substr(0, 2).c_str(), "vi") == 0)
+        {
+            if (comando.size() >= 3)
+            {
+                string enderecosUtilizados;
+                enderecosUtilizados.assign("");
+
+                vi(disco, enderecoInodeAtual, comando.substr(3), enderecosUtilizados);
+            }
+        }
+        else if (strcmp(comando.substr(0, 5).c_str(), "rmdir") == 0)
+        {
+            if (comando.size() >= 6)
+            {
+                int contadorDiretorio = 0;
+                if(rmdir(disco, enderecoInodeAtual, comando.substr(6), contadorDiretorio))
+                    printf("Diretorio removido\n");
+                else
+                    printf("Nao foi possivel remover o diretorio\n");
+            }
+        }
+        else if (strcmp(comando.substr(0, 2).c_str(), "rm") == 0)
+        {
+            if (comando.size() >= 3)
+            {
+                if(rm(disco, enderecoInodeAtual, comando.substr(3)))
+                    printf("Arquivo removido\n");
+                else
+                    printf("Nao foi possivel remover o arquivo\n");
+            }
+        }  
+        else if (strcmp(comando.substr(0, 4).c_str(), "link") == 0)
+        {
+            if (comando.size() >= 6)
+            {
+                if(comando.substr(5, 6).compare("-s"))
+                    linkSimbolico(disco, enderecoInodeAtual, comando.substr(8), enderecoInodeRaiz);
+                else if(comando.substr(5, 6).compare("-h"))
+                    linkFisico(disco, enderecoInodeAtual, comando.substr(8));
+            }
+        }     
         else if (strcmp(comando.c_str(), "trace disk") == 0)
         {
             printf("\n");
@@ -116,13 +167,16 @@ void execucaoSistema(Disco disco[], int quantidadeBlocosTotais, int enderecoInod
             system("cls");
         }
         else if (strcmp(comando.substr(0, 3).c_str(), "bad") == 0)
-        {            
-            endereco = atoi(comando.substr(4).c_str());
-            if (endereco >= 0 && endereco < quantidadeBlocosTotais)
+        {
+            if (comando.size() >= 4)
             {
-                disco[endereco].bad = 1;
-            }else{
-                printf("endereco invalido.\n");
+                endereco = atoi(comando.substr(4).c_str());
+                if (endereco >= 0 && endereco < quantidadeBlocosTotais)
+                {
+                    disco[endereco].bad = 1;
+                }else{
+                    printf("endereco invalido.\n");
+                }
             }
         }
         
