@@ -2203,11 +2203,17 @@ bool rmdir(Disco disco[], int enderecoInodeAtual, string nomeDiretorio, int &con
             // printf("\n-- %d --\n", contadorDiretorio);
             if (contadorDiretorio <= 2)
             {
-                if (isEnderecoValido(disco[enderecoInodeDiretorio].inode.enderecoDireto[0]))
+                if (--disco[enderecoInodeDiretorio].inode.contadorLinkFisico == 0)
                 {
-                    initDisco(disco[disco[enderecoInodeDiretorio].inode.enderecoDireto[0]]);
-                    pushListaBlocoLivre(disco, disco[enderecoInodeDiretorio].inode.enderecoDireto[0]);
-                    disco[enderecoInodeDiretorio].inode.enderecoDireto[0] = getEnderecoNull();
+                    if (isEnderecoValido(disco[enderecoInodeDiretorio].inode.enderecoDireto[0]))
+                    {
+                        initDisco(disco[disco[enderecoInodeDiretorio].inode.enderecoDireto[0]]);
+                        pushListaBlocoLivre(disco, disco[enderecoInodeDiretorio].inode.enderecoDireto[0]);
+                        disco[enderecoInodeDiretorio].inode.enderecoDireto[0] = getEnderecoNull();
+                    }
+
+                    initDisco(disco[enderecoInodeDiretorio]);
+                    pushListaBlocoLivre(disco, enderecoInodeDiretorio);
                 }
 
                 for (int i = pos; i < disco[enderecoEntradaDiretorio].diretorio.TL; i++)
@@ -2216,9 +2222,6 @@ bool rmdir(Disco disco[], int enderecoInodeAtual, string nomeDiretorio, int &con
                 }
 
                 disco[enderecoEntradaDiretorio].diretorio.TL--;
-
-                initDisco(disco[enderecoInodeDiretorio]);
-                pushListaBlocoLivre(disco, enderecoInodeDiretorio);
 
                 return true;
             }
@@ -2278,15 +2281,24 @@ void linkFisico(Disco disco[], int enderecoInodeAtual, string comando, int ender
             nomeDiretorioOrigem.assign(caminhoOrigem.at(caminhoOrigem.size()-1));
 
             enderecoEntradaDiretorio = buscaEnderecoEntradaDiretorioArquivo(disco, enderecoInodeOrigem, nomeDiretorioOrigem);
-            
-            while (pos < disco[enderecoEntradaDiretorio].diretorio.TL)
+            if (isEnderecoNull(enderecoEntradaDiretorio))
             {
-                if (strcmp(disco[enderecoEntradaDiretorio].diretorio.arquivo[pos].nome, nomeDiretorioOrigem.c_str()) == 0)
-                    break;
-                pos++;
+                disco[enderecoInodeOrigem].inode.contadorLinkFisico++;
             }
+            else
+            {
+                while (pos < disco[enderecoEntradaDiretorio].diretorio.TL)
+                {
+                    if (strcmp(disco[enderecoEntradaDiretorio].diretorio.arquivo[pos].nome, nomeDiretorioOrigem.c_str()) == 0)
+                        break;
+                    pos++;
+                }
 
-            disco[disco[enderecoEntradaDiretorio].diretorio.arquivo[pos].enderecoINode].inode.contadorLinkFisico++;
+                enderecoInodeOrigem = disco[enderecoEntradaDiretorio].diretorio.arquivo[pos].enderecoINode;
+
+                disco[enderecoInodeOrigem].inode.contadorLinkFisico++;
+
+            }
 
             for(const auto& str : caminhoDestino)
             {
@@ -2296,9 +2308,56 @@ void linkFisico(Disco disco[], int enderecoInodeAtual, string comando, int ender
             nomeDiretorioDestino.assign(caminhoDestino.at(caminhoDestino.size()-1));
             strcpy(caminhoDestinoChar, nomeDiretorioDestino.c_str());
 
-            addDiretorioEArquivo(disco, disco[disco[enderecoEntradaDiretorio].diretorio.arquivo[pos].enderecoINode].inode.protecao[0], 
+            addDiretorioEArquivo(disco, disco[enderecoInodeOrigem].inode.protecao[0], 
                                 enderecoInodeDestino, caminhoDestinoChar, 1, caminhoAux, 
-                                disco[enderecoEntradaDiretorio].diretorio.arquivo[pos].enderecoINode);
+                                enderecoInodeOrigem);
         }
     }
+}
+
+void unlinkSimbolico(Disco disco[], int enderecoInodeAtual, string nomeArquivo, int enderecoInodeRaiz){
+    int enderecoEntradaDiretorio = buscaEnderecoEntradaDiretorioArquivo(disco, enderecoInodeAtual, nomeArquivo),
+        pos = 0;
+
+    if (isEnderecoValido(enderecoEntradaDiretorio))
+    {
+        while (pos < disco[enderecoEntradaDiretorio].diretorio.TL)
+        {
+            if (strcmp(disco[enderecoEntradaDiretorio].diretorio.arquivo[pos].nome, nomeArquivo.c_str()) == 0)
+                break;
+            pos++;
+        }
+
+        if (disco[disco[enderecoEntradaDiretorio].diretorio.arquivo[pos].enderecoINode].inode.protecao[0] == TIPO_ARQUIVO_LINK)
+        {
+
+        }
+    }
+}
+
+bool unlinkFisico(Disco disco[], int enderecoInodeAtual, string nomeArquivo, int enderecoInodeRaiz){
+    int enderecoEntradaDiretorio = buscaEnderecoEntradaDiretorioArquivo(disco, enderecoInodeAtual, nomeArquivo),
+        pos = 0;
+
+    if (isEnderecoValido(enderecoEntradaDiretorio))
+    {
+        while (pos < disco[enderecoEntradaDiretorio].diretorio.TL)
+        {
+            if (strcmp(disco[enderecoEntradaDiretorio].diretorio.arquivo[pos].nome, nomeArquivo.c_str()) == 0)
+                break;
+            pos++;
+        }
+
+        if (disco[disco[enderecoEntradaDiretorio].diretorio.arquivo[pos].enderecoINode].inode.protecao[0] == TIPO_ARQUIVO_ARQUIVO)
+        {
+            return rm(disco, enderecoInodeAtual, nomeArquivo);
+        }
+        else if (disco[disco[enderecoEntradaDiretorio].diretorio.arquivo[pos].enderecoINode].inode.protecao[0] == TIPO_ARQUIVO_DIRETORIO)
+        {
+            int contadorDiretorio=0;
+            return rmdir(disco, enderecoInodeAtual, nomeArquivo, contadorDiretorio);
+        }
+    }
+
+    return false;
 }
