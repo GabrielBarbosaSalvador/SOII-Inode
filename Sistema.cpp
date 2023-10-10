@@ -8,8 +8,8 @@
 #include <math.h>
 #include <conio.h>
 
-#include "I-NodeTAD.h"
 #include "funcaoSecretaNaoOlha.h"
+#include "I-NodeTAD.h"
 
 using namespace std;
 
@@ -40,7 +40,7 @@ void execucaoSistema(Disco disco[], int quantidadeBlocosTotais, int enderecoInod
     fflush(stdin);
 
     int enderecoInodeAtual = enderecoInodeRaiz;
-
+    
     caminhoAbsoluto.append("~");
 
     printf("\n");
@@ -48,7 +48,7 @@ void execucaoSistema(Disco disco[], int quantidadeBlocosTotais, int enderecoInod
     {		
         if (strcmp(comando.substr(0, 2).c_str(), "ls") == 0)
         {
-            printf("\n");
+            // printf("\n");
             if (comando.size() >= 5 && strcmp(comando.substr(3).c_str(), "-l") == 0)
             {
                 listarDiretorioComAtributos(disco, enderecoInodeAtual);
@@ -74,7 +74,9 @@ void execucaoSistema(Disco disco[], int quantidadeBlocosTotais, int enderecoInod
                 }
                 else
                 {
+                    textcolor(RED);
                     printf("Nao foi possivel criar o diretorio\n");
+                    textcolor(WHITE);
                 }
             }
             // char nomeDiretorio1[MAX_NOME_ARQUIVO];
@@ -102,8 +104,12 @@ void execucaoSistema(Disco disco[], int quantidadeBlocosTotais, int enderecoInod
             if (comando.size() > 6)
                 if(touch(disco, enderecoInodeAtual, touchString))
                     printf("Arquivo criado\n");
-                else
+                else {
+                    textcolor(RED);
                     printf("Nao foi possivel criar o arquivo\n");
+                    textcolor(WHITE);
+                }
+                    
         }
         else if(strcmp(comando.substr(0, 2).c_str(), "df") == 0)
         {
@@ -132,8 +138,11 @@ void execucaoSistema(Disco disco[], int quantidadeBlocosTotais, int enderecoInod
                 int contadorDiretorio = 0;
                 if(rmdir(disco, enderecoInodeAtual, comando.substr(6), contadorDiretorio))
                     printf("Diretorio removido\n");
-                else
+                else {
+                    textcolor(RED);
                     printf("Nao foi possivel remover o diretorio\n");
+                    textcolor(WHITE);
+                }
             }
         }
         else if (strcmp(comando.substr(0, 2).c_str(), "rm") == 0)
@@ -142,8 +151,11 @@ void execucaoSistema(Disco disco[], int quantidadeBlocosTotais, int enderecoInod
             {
                 if(rm(disco, enderecoInodeAtual, comando.substr(3)))
                     printf("Arquivo removido\n");
-                else
+                else {
+                    textcolor(RED);
                     printf("Nao foi possivel remover o arquivo\n");
+                    textcolor(WHITE);
+                }
             }
         }  
         else if (strcmp(comando.substr(0, 4).c_str(), "link") == 0)
@@ -175,12 +187,20 @@ void execucaoSistema(Disco disco[], int quantidadeBlocosTotais, int enderecoInod
                 {
                     disco[endereco].bad = 1;
                 }else{
+                    textcolor(RED);
                     printf("endereco invalido.\n");
+                    textcolor(WHITE);
                 }
             }
         }
-        
-        printf("root@localhost:%s$ ", caminhoAbsoluto.c_str());
+        textcolor(GREEN);
+        printf("root@localhost");
+        textcolor(WHITE);
+        printf(":");
+        textcolor(LIGHTBLUE);
+        printf("%s", caminhoAbsoluto.c_str());
+        textcolor(WHITE);
+        printf("$ ");
 
 		getline(cin, comando);
     } while(strcmp(comando.c_str(), "exit") != 0);
@@ -227,8 +247,8 @@ int main()
     /*no início do sistema, deve ser informado pelo usuário a quantidade total de discos que haverá */
     /*deve ser possível executar o comando ls -l*/
     
-    // iniciarAParada();
-    // getch();
+    iniciarAParada();
+    getch();
     
     system("cls");
     

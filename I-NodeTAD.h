@@ -1765,8 +1765,11 @@ void listarDiretorioComAtributos(Disco disco[], int enderecoInodeAtual)
 
             if (disco[enderecoInodeArquivo].inode.protecao[0] == TIPO_ARQUIVO_LINK)
             {
-                printf("%s -> %s\n", disco[disco[enderecoInodeAtual].inode.enderecoDireto[direto]].diretorio.arquivo[i].nome, 
+                printf("%s",disco[disco[enderecoInodeAtual].inode.enderecoDireto[direto]].diretorio.arquivo[i].nome);
+                textcolor(LIGHTBLUE);
+                printf(" -> %s\n", 
                                     disco[disco[disco[disco[enderecoInodeAtual].inode.enderecoDireto[direto]].diretorio.arquivo[i].enderecoINode].inode.enderecoDireto[0]].ls.caminho.c_str());
+                textcolor(WHITE);
             }
             else
                 printf("%s\n", disco[disco[enderecoInodeAtual].inode.enderecoDireto[direto]].diretorio.arquivo[i].nome);
