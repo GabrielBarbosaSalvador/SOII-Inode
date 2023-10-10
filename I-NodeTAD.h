@@ -2143,8 +2143,11 @@ bool rm(Disco disco[], int enderecoInodeAtual, string nomeArquivo, int primeiraV
 
             disco[enderecoEntradaDiretorio].diretorio.TL--;
 
-            initDisco(disco[enderecoInodeArquivo]);
-            pushListaBlocoLivre(disco, enderecoInodeArquivo);
+            if (--disco[enderecoInodeArquivo].inode.contadorLinkFisico == 0)
+            {
+                initDisco(disco[enderecoInodeArquivo]);
+                pushListaBlocoLivre(disco, enderecoInodeArquivo);
+            }
 
             return true;
         }
@@ -2289,6 +2292,9 @@ void linkFisico(Disco disco[], int enderecoInodeAtual, string comando, int ender
             {
                 enderecoInodeDestino = cd(disco, enderecoInodeDestino, str.c_str(), enderecoInodeRaiz, caminhoAux);
             }
+
+            nomeDiretorioDestino.assign(caminhoDestino.at(caminhoDestino.size()-1));
+            strcpy(caminhoDestinoChar, nomeDiretorioDestino.c_str());
 
             addDiretorioEArquivo(disco, disco[disco[enderecoEntradaDiretorio].diretorio.arquivo[pos].enderecoINode].inode.protecao[0], 
                                 enderecoInodeDestino, caminhoDestinoChar, 1, caminhoAux, 
