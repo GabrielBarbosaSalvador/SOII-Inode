@@ -2248,7 +2248,7 @@ void linkSimbolico(Disco disco[], int enderecoInodeAtual, string comando, int en
 
 void linkFisico(Disco disco[], int enderecoInodeAtual, string comando, int enderecoInodeRaiz)
 {
-    int pos;
+    int pos=0;
     char caminhoDestinoChar[300];
     string caminhoExemplo, nomeDiretorioOrigem, nomeDiretorioDestino;
     string caminhoAux;
