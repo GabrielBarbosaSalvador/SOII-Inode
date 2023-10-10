@@ -162,9 +162,9 @@ void execucaoSistema(Disco disco[], int quantidadeBlocosTotais, int enderecoInod
         {
             if (comando.size() >= 6)
             {
-                if(comando.substr(5, 6).compare("-s"))
+                if(strcmp(comando.substr(5, 2).c_str(), "-s") == 0)
                     linkSimbolico(disco, enderecoInodeAtual, comando.substr(8), enderecoInodeRaiz);
-                else if(comando.substr(5, 6).compare("-h"))
+                else if(strcmp(comando.substr(5, 2).c_str(), "-h") == 0)
                     linkFisico(disco, enderecoInodeAtual, comando.substr(8), enderecoInodeRaiz);
             }
         }     
@@ -247,8 +247,8 @@ int main()
     /*no início do sistema, deve ser informado pelo usuário a quantidade total de discos que haverá */
     /*deve ser possível executar o comando ls -l*/
     
-    iniciarAParada();
-    getch();
+    // iniciarAParada();
+    // getch();
     
     system("cls");
     
