@@ -153,7 +153,7 @@ void execucaoSistema(Disco disco[], int quantidadeBlocosTotais, int enderecoInod
                 if(comando.substr(5, 6).compare("-s"))
                     linkSimbolico(disco, enderecoInodeAtual, comando.substr(8), enderecoInodeRaiz);
                 else if(comando.substr(5, 6).compare("-h"))
-                    linkFisico(disco, enderecoInodeAtual, comando.substr(8));
+                    linkFisico(disco, enderecoInodeAtual, comando.substr(8), enderecoInodeRaiz);
             }
         }     
         else if (strcmp(comando.c_str(), "trace disk") == 0)
