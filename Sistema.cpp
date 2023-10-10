@@ -172,10 +172,10 @@ void execucaoSistema(Disco disco[], int quantidadeBlocosTotais, int enderecoInod
         {
             if (comando.size() >= 6)
             {
-                if(strcmp(comando.substr(5, 2).c_str(), "-s") == 0)
-                    unlinkSimbolico(disco, enderecoInodeAtual, comando.substr(8), enderecoInodeRaiz);
-                else if(strcmp(comando.substr(5, 2).c_str(), "-h") == 0)
-                    unlinkFisico(disco, enderecoInodeAtual, comando.substr(8), enderecoInodeRaiz);
+                if(strcmp(comando.substr(7, 2).c_str(), "-s") == 0)
+                    unlinkSimbolico(disco, enderecoInodeAtual, comando.substr(10), enderecoInodeRaiz);
+                else if(strcmp(comando.substr(7, 2).c_str(), "-h") == 0)
+                    unlinkFisico(disco, enderecoInodeAtual, comando.substr(10), enderecoInodeRaiz);
             }
         }  
         else if (strcmp(comando.c_str(), "trace disk") == 0)
