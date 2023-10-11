@@ -56,6 +56,9 @@ void execucaoSistema(Disco disco[], int quantidadeBlocosTotais, int enderecoInod
             else if (comando.size() >= 5 && strcmp(comando.substr(3).c_str(), "-e") == 0){
                 listaDiretorioAtualIgualExplorer(disco, enderecoInodeAtual);
             }
+            else if (comando.size() >= 5 && strcmp(comando.substr(3).c_str(), "-li") == 0){
+                listaLinkDiretorioAtual(disco, enderecoInodeAtual);
+            }
             else
             {
                 listarDiretorio(disco, enderecoInodeAtual);
@@ -220,8 +223,23 @@ void execucaoSistema(Disco disco[], int quantidadeBlocosTotais, int enderecoInod
         else if (strcmp(comando.substr(0, 8).c_str(), "max file") == 0)
         {
             int quantidadeBlocosDisponiveis = getQuantidadeBlocosLivres(disco);
-            int quantidadeTotal = getQuantidadeBlocosMaiorArquivo(disco, quantidadeBlocosDisponiveis);
-            printf("Pode ser usado [%d] blocos para inserir um arquivo", quantidadeTotal);
+            int quantidadeUtilizadas = 0;
+            int quantidadeRealUtilizada = 0;
+            getQuantidadeBlocosMaiorArquivo(disco, quantidadeBlocosDisponiveis, quantidadeUtilizadas, quantidadeRealUtilizada);
+
+            printf("Pode ser usado %d de %d blocos para inserir um arquivo(%.2f%% aproveitamento)\n", quantidadeRealUtilizada, quantidadeUtilizadas, (float) quantidadeRealUtilizada/ (float)quantidadeUtilizadas*100);
+        }
+        else if (strcmp(comando.substr(0, 10).c_str(), "lost block") == 0)
+        {   
+            int blocosPerdidos = quantidadeBlocosTotais / QUANTIDADE_LIMITE_ENDERECO_LISTA_BLOCO_LIVRE;
+            int blocosPerdidosBytes = getQuantidadeBlocosPerdidos(quantidadeBlocosTotais);            
+
+            printf("Foram perdidos %d (%d em Bytes) de %d blocos (%.2f%% de perca)\n", blocosPerdidos, blocosPerdidosBytes, quantidadeBlocosTotais, (float) blocosPerdidos/ (float)quantidadeBlocosTotais*100);
+        }
+        else if (strcmp(comando.substr(0, 11).c_str(), "check files") == 0)
+        {   
+            buscaBlocosIntegrosCorrompidos(disco, enderecoInodeAtual);
+            printf("\n");
         }
 
         textcolor(GREEN);
