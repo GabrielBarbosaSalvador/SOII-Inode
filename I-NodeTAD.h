@@ -2246,9 +2246,18 @@ void linkSimbolico(Disco disco[], int enderecoInodeAtual, string comando, int en
 
     if (caminhosOrigemDestino.size() == 2)
     {
-        
-        caminhoOrigem = split(caminhosOrigemDestino.at(0), '/');
         caminhoDestino = split(caminhosOrigemDestino.at(1), '/');
+        
+        if(caminhosOrigemDestino.at(0).at(0) == '/') {
+            caminhoOrigem.push_back("/");
+
+            for(const string& elem : split(caminhosOrigemDestino.at(0), '/')) {
+                caminhoOrigem.push_back(elem);
+            }
+        }
+        else {
+            caminhoOrigem = split(caminhosOrigemDestino.at(0), '/');
+        }
 
         strcpy(caminhoDestinoChar, caminhoDestino.at(0).c_str());
 
