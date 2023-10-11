@@ -4,6 +4,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <ctype.h>
 
 using namespace std;
 
@@ -1494,6 +1495,29 @@ void addArquivoNoDiretorio(Disco disco[], int enderecoDiretorio, int enderecoIno
     strcpy(disco[enderecoDiretorio].diretorio.arquivo[disco[enderecoDiretorio].diretorio.TL++].nome, nomeDiretorioArquivo);
 }
 
+void removeArquivoNoDiretorio(Disco disco[], int enderecoEntradaDiretorio, int posicaoRemovida)
+{
+    for (int i = posicaoRemovida; i < disco[enderecoEntradaDiretorio].diretorio.TL; i++)
+    {
+        disco[enderecoEntradaDiretorio].diretorio.arquivo[i] = disco[enderecoEntradaDiretorio].diretorio.arquivo[i + 1];
+    }
+
+    disco[enderecoEntradaDiretorio].diretorio.TL--;
+}
+
+int buscaArquivoNoDiretorio(Disco disco[], int enderecoEntradaDiretorio, string nomeArquivo){
+    int pos=0;
+
+    while (pos < disco[enderecoEntradaDiretorio].diretorio.TL)
+    {
+        if (strcmp(disco[enderecoEntradaDiretorio].diretorio.arquivo[pos].nome, nomeArquivo.c_str()) == 0)
+            break;
+        pos++;
+    }
+
+    return pos;
+}
+
 // função que busca qual o diretório que será possível inserir o arquivo ou diretório
 int addDiretorioEArquivo(Disco disco[], char tipoArquivo, int enderecoInodeDiretorioAtual, char nomeDiretorioArquivoNovo[MAX_NOME_ARQUIVO], int tamanhoArquivo = 1, string caminhoLink="", int enderecoInodeCriado=getEnderecoNull())
 {
@@ -2129,19 +2153,9 @@ bool rm(Disco disco[], int enderecoInodeAtual, string nomeArquivo, int primeiraV
             int enderecoEntradaDiretorio = buscaEnderecoEntradaDiretorioArquivo(disco, enderecoInodeAtual, nomeArquivo, TIPO_ARQUIVO_ARQUIVO);
             int pos = 0;
 
-            while (pos < disco[enderecoEntradaDiretorio].diretorio.TL)
-            {
-                if (strcmp(disco[enderecoEntradaDiretorio].diretorio.arquivo[pos].nome, nomeArquivo.c_str()) == 0)
-                    break;
-                pos++;
-            }
+            pos = buscaArquivoNoDiretorio(disco, enderecoEntradaDiretorio, nomeArquivo);
 
-            for (int i = pos; i < disco[enderecoEntradaDiretorio].diretorio.TL; i++)
-            {
-                disco[enderecoEntradaDiretorio].diretorio.arquivo[i] = disco[enderecoEntradaDiretorio].diretorio.arquivo[i + 1];
-            }
-
-            disco[enderecoEntradaDiretorio].diretorio.TL--;
+            removeArquivoNoDiretorio(disco, enderecoEntradaDiretorio, pos);
 
             if (--disco[enderecoInodeArquivo].inode.contadorLinkFisico == 0)
             {
@@ -2171,12 +2185,7 @@ bool rmdir(Disco disco[], int enderecoInodeAtual, string nomeDiretorio, int &con
         int enderecoInodeDiretorio;
         if(primeiraVez)
         {
-            while (pos < disco[enderecoEntradaDiretorio].diretorio.TL)
-            {
-                if (strcmp(disco[enderecoEntradaDiretorio].diretorio.arquivo[pos].nome, nomeDiretorio.c_str()) == 0)
-                    break;
-                pos++;
-            }
+            pos = buscaArquivoNoDiretorio(disco, enderecoEntradaDiretorio, nomeDiretorio);
 
             enderecoInodeDiretorio = disco[enderecoEntradaDiretorio].diretorio.arquivo[pos].enderecoINode;
         }
@@ -2216,12 +2225,7 @@ bool rmdir(Disco disco[], int enderecoInodeAtual, string nomeDiretorio, int &con
                     pushListaBlocoLivre(disco, enderecoInodeDiretorio);
                 }
 
-                for (int i = pos; i < disco[enderecoEntradaDiretorio].diretorio.TL; i++)
-                {
-                    disco[enderecoEntradaDiretorio].diretorio.arquivo[i] = disco[enderecoEntradaDiretorio].diretorio.arquivo[i + 1];
-                }
-
-                disco[enderecoEntradaDiretorio].diretorio.TL--;
+                removeArquivoNoDiretorio(disco, enderecoEntradaDiretorio, pos);
 
                 return true;
             }
@@ -2242,6 +2246,7 @@ void linkSimbolico(Disco disco[], int enderecoInodeAtual, string comando, int en
 
     if (caminhosOrigemDestino.size() == 2)
     {
+        
         caminhoOrigem = split(caminhosOrigemDestino.at(0), '/');
         caminhoDestino = split(caminhosOrigemDestino.at(1), '/');
 
@@ -2278,7 +2283,7 @@ void linkFisico(Disco disco[], int enderecoInodeAtual, string comando, int ender
 
         if (isEnderecoValido(enderecoInodeOrigem))
         {
-            nomeDiretorioOrigem.assign(caminhoOrigem.at(caminhoOrigem.size()-1));
+            nomeDiretorioOrigem.assign(lastPosition(caminhoOrigem));
 
             enderecoEntradaDiretorio = buscaEnderecoEntradaDiretorioArquivo(disco, enderecoInodeOrigem, nomeDiretorioOrigem);
             if (isEnderecoNull(enderecoEntradaDiretorio))
@@ -2287,12 +2292,7 @@ void linkFisico(Disco disco[], int enderecoInodeAtual, string comando, int ender
             }
             else
             {
-                while (pos < disco[enderecoEntradaDiretorio].diretorio.TL)
-                {
-                    if (strcmp(disco[enderecoEntradaDiretorio].diretorio.arquivo[pos].nome, nomeDiretorioOrigem.c_str()) == 0)
-                        break;
-                    pos++;
-                }
+                pos = buscaArquivoNoDiretorio(disco, enderecoEntradaDiretorio, nomeDiretorioOrigem);
 
                 enderecoInodeOrigem = disco[enderecoEntradaDiretorio].diretorio.arquivo[pos].enderecoINode;
 
@@ -2315,22 +2315,31 @@ void linkFisico(Disco disco[], int enderecoInodeAtual, string comando, int ender
     }
 }
 
-void unlinkSimbolico(Disco disco[], int enderecoInodeAtual, string nomeArquivo, int enderecoInodeRaiz){
+void unlinkSimbolico(Disco disco[], int enderecoInodeAtual, string nomeArquivo, int enderecoInodeRaiz)
+{
     int enderecoEntradaDiretorio = buscaEnderecoEntradaDiretorioArquivo(disco, enderecoInodeAtual, nomeArquivo),
         pos = 0;
 
     if (isEnderecoValido(enderecoEntradaDiretorio))
     {
-        while (pos < disco[enderecoEntradaDiretorio].diretorio.TL)
-        {
-            if (strcmp(disco[enderecoEntradaDiretorio].diretorio.arquivo[pos].nome, nomeArquivo.c_str()) == 0)
-                break;
-            pos++;
-        }
+        pos = buscaArquivoNoDiretorio(disco, enderecoEntradaDiretorio, nomeArquivo);
 
         if (disco[disco[enderecoEntradaDiretorio].diretorio.arquivo[pos].enderecoINode].inode.protecao[0] == TIPO_ARQUIVO_LINK)
         {
+            disco[disco[enderecoEntradaDiretorio].diretorio.arquivo[pos].enderecoINode].inode.enderecoDireto[0];
 
+            //inicializa aquela posição do disco para remover o apontamento
+            initDisco(disco[disco[disco[enderecoEntradaDiretorio].diretorio.arquivo[pos].enderecoINode].inode.enderecoDireto[0]]);
+            //joga de volta pra lista de blocos livres
+            pushListaBlocoLivre(disco, disco[disco[enderecoEntradaDiretorio].diretorio.arquivo[pos].enderecoINode].inode.enderecoDireto[0]);
+
+            //inicializa a posição do disco que armazena o inode
+            initDisco(disco[disco[enderecoEntradaDiretorio].diretorio.arquivo[pos].enderecoINode]);
+            //joga de volta pra lista de blocos livres
+            pushListaBlocoLivre(disco, disco[disco[enderecoEntradaDiretorio].diretorio.arquivo[pos].enderecoINode].inode.enderecoDireto[0]);
+
+
+            removeArquivoNoDiretorio(disco, enderecoEntradaDiretorio, pos);
         }
     }
 }
@@ -2341,12 +2350,7 @@ bool unlinkFisico(Disco disco[], int enderecoInodeAtual, string nomeArquivo, int
 
     if (isEnderecoValido(enderecoEntradaDiretorio))
     {
-        while (pos < disco[enderecoEntradaDiretorio].diretorio.TL)
-        {
-            if (strcmp(disco[enderecoEntradaDiretorio].diretorio.arquivo[pos].nome, nomeArquivo.c_str()) == 0)
-                break;
-            pos++;
-        }
+        pos = buscaArquivoNoDiretorio(disco, enderecoEntradaDiretorio, nomeArquivo);
 
         if (disco[disco[enderecoEntradaDiretorio].diretorio.arquivo[pos].enderecoINode].inode.protecao[0] == TIPO_ARQUIVO_ARQUIVO)
         {
@@ -2360,4 +2364,161 @@ bool unlinkFisico(Disco disco[], int enderecoInodeAtual, string nomeArquivo, int
     }
 
     return false;
+}
+
+void alteraPermissao(char permissao[], char tipoUGO, bool adiciona, char permFornecida[])
+{
+    int pos;
+
+    if (tipoUGO == 'u')
+        pos=1;
+    else if (tipoUGO == 'g')
+        pos=4;
+    else
+        pos=7;
+
+    if (adiciona)
+    {
+        //se permFornecida for diferente de '-', significa que estou adicionando
+        if (permFornecida[0] != '-')
+            permissao[pos] = permFornecida[0];
+
+        pos++;
+        if (permFornecida[1] != '-')
+            permissao[pos] = permFornecida[1];
+
+        pos++;
+        if (permFornecida[2] != '-')
+            permissao[pos] = permFornecida[2];
+    }
+    else
+    {
+        //se permFornecida for igual a '-', significa que estou removendo
+        if (permFornecida[0] == '-')
+            permissao[pos] = permFornecida[0];
+
+        pos++;
+        if (permFornecida[1] == '-')
+            permissao[pos] = permFornecida[1];
+
+        pos++;
+        if (permFornecida[2] == '-')
+            permissao[pos] = permFornecida[2];
+    }
+}
+
+void chmod(Disco disco[], int enderecoInodeAtual, string comando)
+{
+    char perm[4];
+    int r, w, x, pos;
+    char permissao[11];
+    vector<string> splitComando = split(comando, ' ');
+    //chmod u+w teste.old
+    //chmod g+rw teste.old
+    //chmod o-rwx teste.old
+    //chmod
+    //chmod 777 teste.old
+
+    if (splitComando.size() == 2)
+    {
+        string permissaoSolicitada(stringToLower(splitComando.at(0)));
+        string nomeArquivo(splitComando.at(1));
+        int enderecoInode = existeArquivoOuDiretorio(disco, enderecoInodeAtual, nomeArquivo);
+
+        if (isEnderecoValido(enderecoInode))
+        {
+            strcpy(permissao, disco[enderecoInode].inode.protecao);
+
+            if (permissaoSolicitada.at(1) == '+') //está adicionando permissão
+            {
+                r = ocorrenciaString(permissaoSolicitada.substr(2), 'r');
+                w = ocorrenciaString(permissaoSolicitada.substr(2), 'w');
+                x = ocorrenciaString(permissaoSolicitada.substr(2), 'x');
+
+                if (r > 0)
+                    perm[0] = 'r';
+                else
+                    perm[0] = '-';
+
+                if (w > 0)
+                    perm[1] = 'w';
+                else
+                    perm[1] = '-';
+
+                if (x > 0)
+                    perm[2] = 'x';
+                else
+                    perm[2] = '-';
+
+                perm[3] = '\0';
+
+                switch(tolower(permissaoSolicitada.at(0)))
+                {
+                    case 'u':
+                    case 'g':
+                    case 'o':
+                        alteraPermissao(permissao, permissaoSolicitada.at(0), true, perm);
+                    break;
+
+                    case 'a':
+                        alteraPermissao(permissao, 'u', true, perm);
+                        alteraPermissao(permissao, 'g', true, perm);
+                        alteraPermissao(permissao, 'o', true, perm);
+                    break;
+                }
+
+                strcpy(disco[enderecoInode].inode.protecao, permissao);
+            }
+            else if (permissaoSolicitada.at(1) == '-') //está retirando permissão
+            {
+                r = ocorrenciaString(permissaoSolicitada.substr(2), 'r');
+                w = ocorrenciaString(permissaoSolicitada.substr(2), 'w');
+                x = ocorrenciaString(permissaoSolicitada.substr(2), 'x');
+
+                if (r > 0)
+                    perm[0] = '-';
+                else
+                    perm[0] = 'r';
+
+                if (w > 0)
+                    perm[1] = '-';
+                else
+                    perm[1] = 'w';
+
+                if (x > 0)
+                    perm[2] = '-';
+                else
+                    perm[2] = 'x';
+
+                perm[3] = '\0';
+
+                switch(tolower(permissaoSolicitada.at(0)))
+                {
+                    case 'u':
+                    case 'g':
+                    case 'o':
+                        alteraPermissao(permissao, permissaoSolicitada.at(0), false, perm);
+                    break;
+
+                    case 'a':
+                        alteraPermissao(permissao, 'u', false, perm);
+                        alteraPermissao(permissao, 'g', false, perm);
+                        alteraPermissao(permissao, 'o', false, perm);
+                    break;
+                }
+
+                strcpy(disco[enderecoInode].inode.protecao, permissao);
+            }
+            else //utilizou ou caracter ou int
+            { 
+                if (permissaoSolicitada.at(0) >= '0' && permissaoSolicitada.at(0) <= '7')
+                {
+                    int per = atoi(permissaoSolicitada.c_str());
+                    convertPermissaoUGOToString(per, permissao, 1);
+
+                    strcpy(disco[enderecoInode].inode.protecao, permissao);
+                }
+            }
+        }
+    }
 }

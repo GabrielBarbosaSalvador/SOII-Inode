@@ -177,7 +177,18 @@ void execucaoSistema(Disco disco[], int quantidadeBlocosTotais, int enderecoInod
                 else if(strcmp(comando.substr(7, 2).c_str(), "-h") == 0)
                     unlinkFisico(disco, enderecoInodeAtual, comando.substr(10), enderecoInodeRaiz);
             }
-        }  
+        }
+        else if (strcmp(comando.substr(0, 5).c_str(), "chmod") == 0)
+        {
+            if (comando.size() >= 7)
+            {
+                chmod(disco, enderecoInodeAtual, comando.substr(6));
+                // if(strcmp(comando.substr(6, 2).c_str(), "-s") == 0)
+                //     unlinkSimbolico(disco, enderecoInodeAtual, comando.substr(10), enderecoInodeRaiz);
+                // else if(strcmp(comando.substr(6, 2).c_str(), "-h") == 0)
+                //     unlinkFisico(disco, enderecoInodeAtual, comando.substr(10), enderecoInodeRaiz);
+            }
+        } 
         else if (strcmp(comando.c_str(), "trace disk") == 0)
         {
             printf("\n");
