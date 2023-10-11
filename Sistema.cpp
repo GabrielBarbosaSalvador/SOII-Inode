@@ -49,19 +49,19 @@ void execucaoSistema(Disco disco[], int quantidadeBlocosTotais, int enderecoInod
         if (strcmp(comando.substr(0, 2).c_str(), "ls") == 0)
         {
             // printf("\n");
-            if (comando.size() >= 5 && strcmp(comando.substr(3).c_str(), "-l") == 0)
+            if (comando.size() >= 5 && strcmp(comando.substr(3).c_str(), "-li") == 0){
+                listaLinkDiretorioAtual(disco, enderecoInodeAtual);
+            }
+            else if (comando.size() >= 5 && strcmp(comando.substr(3, 2).c_str(), "-l") == 0)
             {
-                listarDiretorioComAtributos(disco, enderecoInodeAtual);
+                listarDiretorioComAtributos(disco, enderecoInodeAtual, strcmp(comando.substr(3).c_str(), "-la") == 0);
             }
             else if (comando.size() >= 5 && strcmp(comando.substr(3).c_str(), "-e") == 0){
                 listaDiretorioAtualIgualExplorer(disco, enderecoInodeAtual);
             }
-            else if (comando.size() >= 5 && strcmp(comando.substr(3).c_str(), "-li") == 0){
-                listaLinkDiretorioAtual(disco, enderecoInodeAtual);
-            }
             else
             {
-                listarDiretorio(disco, enderecoInodeAtual);
+                listarDiretorio(disco, enderecoInodeAtual, comando.size() >= 5 && strcmp(comando.substr(3).c_str(), "-a") == 0);
             }
 
             printf("\n");

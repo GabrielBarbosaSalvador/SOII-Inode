@@ -751,7 +751,7 @@ void buscarLivresOcupadosInodeIndiretoTriplo(Disco disco[], int enderecoInodeInd
 }
 
 // utilizado para exibir os diretórios do disco
-void listarDiretorioInodeIndiretoSimples(Disco disco[], int enderecoInodeIndireto, int &linha, char tipoListagem, int ChamadoPeloTriplo = 0)
+void listarDiretorioInodeIndiretoSimples(Disco disco[], int enderecoInodeIndireto, int &linha, char tipoListagem, bool exibeDiretorioOculto, int ChamadoPeloTriplo = 0)
 {
     int enderecoInodeArquivo;
     int i;
@@ -798,7 +798,7 @@ void listarDiretorioInodeIndiretoSimples(Disco disco[], int enderecoInodeIndiret
 }
 
 // utilizado para exibir os diretórios do disco
-void listarDiretorioInodeIndiretoDuplo(Disco disco[], int enderecoInodeIndireto, int &linha, char tipoListagem, int ChamadoPeloTriplo = 0)
+void listarDiretorioInodeIndiretoDuplo(Disco disco[], int enderecoInodeIndireto, int &linha, char tipoListagem, bool exibeDiretorioOculto, int ChamadoPeloTriplo = 0)
 {
 
     // verifica se a quantidade de Endereços no inode indireto não está cheio
@@ -808,14 +808,14 @@ void listarDiretorioInodeIndiretoDuplo(Disco disco[], int enderecoInodeIndireto,
         // adiciona novos blocos enquanto a quantidade for menor que o necessário e que não esteja cheio
         while (inicio < disco[enderecoInodeIndireto].inodeIndireto.TL && inicio < MAX_INODEINDIRETO)
         {
-            listarDiretorioInodeIndiretoSimples(disco, disco[enderecoInodeIndireto].inodeIndireto.endereco[inicio], linha, tipoListagem, ChamadoPeloTriplo && inicio + 1 == MAX_INODEINDIRETO);
+            listarDiretorioInodeIndiretoSimples(disco, disco[enderecoInodeIndireto].inodeIndireto.endereco[inicio], linha, tipoListagem, exibeDiretorioOculto, ChamadoPeloTriplo && inicio + 1 == MAX_INODEINDIRETO);
             inicio++;
         }
     }
 }
 
 // utilizado para exibir os diretórios do disco
-void listarDiretorioInodeIndiretoTriplo(Disco disco[], int enderecoInodeIndireto, int &linha, char tipoListagem, int ChamadoPeloTriplo = 0)
+void listarDiretorioInodeIndiretoTriplo(Disco disco[], int enderecoInodeIndireto, int &linha, char tipoListagem, bool exibeDiretorioOculto, int ChamadoPeloTriplo = 0)
 {
 
     // verifica se a quantidade de Endereços no inode indireto não está cheio
@@ -825,7 +825,7 @@ void listarDiretorioInodeIndiretoTriplo(Disco disco[], int enderecoInodeIndireto
         // adiciona novos blocos enquanto a quantidade for menor que o necessário e que não esteja cheio
         while (inicio < disco[enderecoInodeIndireto].inodeIndireto.TL && inicio < MAX_INODEINDIRETO)
         {
-            listarDiretorioInodeIndiretoDuplo(disco, disco[enderecoInodeIndireto].inodeIndireto.endereco[inicio], linha, tipoListagem, 1);
+            listarDiretorioInodeIndiretoDuplo(disco, disco[enderecoInodeIndireto].inodeIndireto.endereco[inicio], linha, tipoListagem, exibeDiretorioOculto, 1);
             inicio++;
         }
     }
@@ -1888,13 +1888,13 @@ void exibirDisco(Disco disco[], int tamanhoDisco, int quantidadeBlocosNecessario
     }
 }
 
-void listarDiretorio(Disco disco[], int enderecoInodeAtual)
+void listarDiretorio(Disco disco[], int enderecoInodeAtual, bool exibeDiretorioOculto=false)
 {
     int direto, i, linha = 0;
 
     for (direto = 0; direto < 5 && isEnderecoValido(disco[enderecoInodeAtual].inode.enderecoDireto[direto]); direto++)
     {
-        for (i = (direto == 0 ? 2 : 0); i < disco[disco[enderecoInodeAtual].inode.enderecoDireto[direto]].diretorio.TL; i++)
+        for (i = (!exibeDiretorioOculto && direto == 0 ? 2 : 0); i < disco[disco[enderecoInodeAtual].inode.enderecoDireto[direto]].diretorio.TL; i++)
         {
             printf("%s\t", disco[disco[enderecoInodeAtual].inode.enderecoDireto[direto]].diretorio.arquivo[i].nome);
         }
@@ -1909,27 +1909,27 @@ void listarDiretorio(Disco disco[], int enderecoInodeAtual)
 
     if (!isEnderecoNull(disco[enderecoInodeAtual].inode.enderecoSimplesIndireto))
     {
-        listarDiretorioInodeIndiretoSimples(disco, disco[enderecoInodeAtual].inode.enderecoSimplesIndireto, linha, 0);
+        listarDiretorioInodeIndiretoSimples(disco, disco[enderecoInodeAtual].inode.enderecoSimplesIndireto, linha, 0, exibeDiretorioOculto);
     }
 
     if (!isEnderecoNull(disco[enderecoInodeAtual].inode.enderecoDuploIndireto))
     {
-        listarDiretorioInodeIndiretoDuplo(disco, disco[enderecoInodeAtual].inode.enderecoDuploIndireto, linha, 0);
+        listarDiretorioInodeIndiretoDuplo(disco, disco[enderecoInodeAtual].inode.enderecoDuploIndireto, linha, 0, exibeDiretorioOculto);
     }
 
     if (!isEnderecoNull(disco[enderecoInodeAtual].inode.enderecoTriploIndireto))
     {
-        listarDiretorioInodeIndiretoTriplo(disco, disco[enderecoInodeAtual].inode.enderecoTriploIndireto, linha, 0);
+        listarDiretorioInodeIndiretoTriplo(disco, disco[enderecoInodeAtual].inode.enderecoTriploIndireto, linha, 0, exibeDiretorioOculto);
     }
 }
 
-void listarDiretorioComAtributos(Disco disco[], int enderecoInodeAtual)
+void listarDiretorioComAtributos(Disco disco[], int enderecoInodeAtual, bool exibeDiretorioOculto=false)
 {
     int direto, i, linha = 0, enderecoInodeArquivo;
 
     for (direto = 0; direto < 5 && isEnderecoValido(disco[enderecoInodeAtual].inode.enderecoDireto[direto]); direto++)
     {
-        for (i = (direto == 0 ? 2 : 0); i < disco[disco[enderecoInodeAtual].inode.enderecoDireto[direto]].diretorio.TL; i++)
+        for (i = (!exibeDiretorioOculto && direto == 0 ? 2 : 0); i < disco[disco[enderecoInodeAtual].inode.enderecoDireto[direto]].diretorio.TL; i++)
         {
             enderecoInodeArquivo = disco[disco[enderecoInodeAtual].inode.enderecoDireto[direto]].diretorio.arquivo[i].enderecoINode;
 
@@ -1955,17 +1955,17 @@ void listarDiretorioComAtributos(Disco disco[], int enderecoInodeAtual)
 
     if (!isEnderecoNull(disco[enderecoInodeAtual].inode.enderecoSimplesIndireto))
     {
-        listarDiretorioInodeIndiretoSimples(disco, disco[enderecoInodeAtual].inode.enderecoSimplesIndireto, linha, 1);
+        listarDiretorioInodeIndiretoSimples(disco, disco[enderecoInodeAtual].inode.enderecoSimplesIndireto, linha, 1, exibeDiretorioOculto);
     }
 
     if (!isEnderecoNull(disco[enderecoInodeAtual].inode.enderecoDuploIndireto))
     {
-        listarDiretorioInodeIndiretoDuplo(disco, disco[enderecoInodeAtual].inode.enderecoDuploIndireto, linha, 1);
+        listarDiretorioInodeIndiretoDuplo(disco, disco[enderecoInodeAtual].inode.enderecoDuploIndireto, linha, 1, exibeDiretorioOculto);
     }
 
     if (!isEnderecoNull(disco[enderecoInodeAtual].inode.enderecoTriploIndireto))
     {
-        listarDiretorioInodeIndiretoTriplo(disco, disco[enderecoInodeAtual].inode.enderecoTriploIndireto, linha, 1);
+        listarDiretorioInodeIndiretoTriplo(disco, disco[enderecoInodeAtual].inode.enderecoTriploIndireto, linha, 1, exibeDiretorioOculto);
     }
 }
 
