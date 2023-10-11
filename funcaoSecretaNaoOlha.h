@@ -1,6 +1,7 @@
 
 
 void iniciarAParada() {
+	system("cls");
 	printf("        --*:-*#*:::***$-:.++            db   dD db    db  .d8b.  .d8888. d88888b\n");
 	printf("       @@Y ..--Y*.**#*--.    @@--       88 ,8P' 88    88 d8' `8b 88'  YP 88'\n");
 	printf("     MMY ........    ...       mm--     88,8P   88    88 88ooo88 `8bo.   88ooooo\n");

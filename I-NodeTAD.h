@@ -2011,48 +2011,49 @@ int cd(Disco disco[], int enderecoInodeAtual, string nomeDiretorio, int endereco
     }
     else
     {
-        
-        endereco = existeArquivoOuDiretorio(disco, enderecoInodeAtual, nomeDiretorio, TIPO_ARQUIVO_ARQUIVO, false);
-        if (isEnderecoValido(endereco))
+        if (ocorrenciaString(nomeDiretorio, '/') > 0)
         {
-            if (disco[endereco].inode.protecao[0] == TIPO_ARQUIVO_LINK)
+            int enderecoInodeOrigem = enderecoInodeAtual;
+            vector<string> caminhoOrigem = splitPath(nomeDiretorio);
+
+            for(const auto& str : caminhoOrigem)
             {
-                int enderecoInodeOrigem = enderecoInodeAtual;
-                vector<string> caminhoOrigem = split(disco[disco[endereco].inode.enderecoDireto[0]].ls.caminho, '/');
-                
-                if(disco[disco[endereco].inode.enderecoDireto[0]].ls.caminho.at(0) == '/') {
-                    caminhoOrigem.push_back("/");
-
-                    for(const string& elem : split(disco[disco[endereco].inode.enderecoDireto[0]].ls.caminho, '/')) {
-                        caminhoOrigem.push_back(elem);
-                    }
-                }
-                else {
-                    caminhoOrigem = split(disco[disco[endereco].inode.enderecoDireto[0]].ls.caminho, '/');
-                }
-
-
-                for(const auto& str : caminhoOrigem)
-                {
-                    enderecoInodeOrigem = cd(disco, enderecoInodeOrigem, str.c_str(), enderecoInodeRaiz, caminhoAbsoluto); 
-                    // printf(" -- %s %d -- ", str.c_str(), enderecoInodeOrigem);
-                }
-
-                return enderecoInodeOrigem;
+                enderecoInodeOrigem = cd(disco, enderecoInodeOrigem, str.c_str(), enderecoInodeRaiz, caminhoAbsoluto); 
             }
-            else
-                caminhoAbsoluto.append("/" + nomeDiretorio);
 
-            return endereco;
+            return enderecoInodeOrigem; 
         }
         else
+        {
+            endereco = existeArquivoOuDiretorio(disco, enderecoInodeAtual, nomeDiretorio, TIPO_ARQUIVO_ARQUIVO, false);
+            if (isEnderecoValido(endereco))
+            {
+                if (disco[endereco].inode.protecao[0] == TIPO_ARQUIVO_LINK)
+                {
+                    int enderecoInodeOrigem = enderecoInodeAtual;
+                    vector<string> caminhoOrigem = splitPath(disco[disco[endereco].inode.enderecoDireto[0]].ls.caminho);
+
+                    for(const auto& str : caminhoOrigem)
+                    {
+                        enderecoInodeOrigem = cd(disco, enderecoInodeOrigem, str.c_str(), enderecoInodeRaiz, caminhoAbsoluto); 
+                    }
+
+                    return enderecoInodeOrigem;
+                }
+                else
+                    caminhoAbsoluto.append("/" + nomeDiretorio);
+
+                return endereco;
+            }
+
             return enderecoInodeAtual;
+        }
     }
 }
 
-bool touch(Disco disco[], int enderecoInodeAtual, char comando[])
+bool touch(Disco disco[], int enderecoInodeAtual, int enderecoInodeRaiz, char comando[])
 {
-    string comandoString(comando);
+    string comandoString(comando), caminhoAux;
     int endereco = getEnderecoNull();
     vector<string> vetorStringSeparado = split(comandoString, ' ');
 
@@ -2062,19 +2063,17 @@ bool touch(Disco disco[], int enderecoInodeAtual, char comando[])
         strcpy(nomeArquivo, vetorStringSeparado.at(0).c_str());
         int tamanhoArquivo = atoi(vetorStringSeparado.at(1).c_str());
 
-        endereco = existeArquivoOuDiretorio(disco, enderecoInodeAtual, nomeArquivo);
+        int enderecoInodeOrigem = cd(disco, enderecoInodeAtual, nomeArquivo, enderecoInodeRaiz, caminhoAux);
+        vetorStringSeparado = splitPath(nomeArquivo);
+
+        endereco = existeArquivoOuDiretorio(disco, enderecoInodeOrigem, lastPosition(vetorStringSeparado).c_str());
         if (isEnderecoNull(endereco)) // ainda não tem nenhum arquivo criado com esse nome
         {
-            
             int quantidadeBlocosLivres = getQuantidadeBlocosLivres(disco);
-            // printf(" \n -- %d -- \n", getQuantidadeBlocosUsar(disco, ceil((float)quantidadeBlocosLivres / (float)10)));
-            // printf("\n - %d - \n", quantidadeBlocosLivres);
-            int quantidadeBlocosUsados = getQuantidadeBlocosUsar(disco, ceil((float)tamanhoArquivo / (float)10));
-
-            
-
+            int quantidadeBlocosUsados = getQuantidadeBlocosUsar(disco, ceil((float)tamanhoArquivo / (float)10));            
+            strcpy(nomeArquivo, lastPosition(vetorStringSeparado).c_str());
             if (quantidadeBlocosLivres - quantidadeBlocosUsados >= 0)
-                return isEnderecoValido(addDiretorioEArquivo(disco, TIPO_ARQUIVO_ARQUIVO, enderecoInodeAtual, nomeArquivo, tamanhoArquivo));
+                return isEnderecoValido(addDiretorioEArquivo(disco, TIPO_ARQUIVO_ARQUIVO, enderecoInodeOrigem, nomeArquivo, tamanhoArquivo));
         }
     }
 
@@ -3119,4 +3118,48 @@ void listaLinkDiretorioAtual(Disco disco[], int enderecoInodeAtual, bool primeir
     {
         listaDiretorioAtualIgualExplorerInodeIndiretoTriplo(disco, disco[enderecoInodeAtual].inode.enderecoTriploIndireto);
     }
+}
+
+int mkdir(Disco disco[], int enderecoInodeAtual, int enderecoInodeRaiz, string comando)
+{
+    int i=0;
+    bool possivelInserir=true;
+    string caminhoAux;
+    char nomeDiretorio[MAX_NOME_ARQUIVO];
+    int enderecoInodeGravacao = enderecoInodeAtual;
+    vector<string> caminhoCompleto = splitPath(comando);
+
+    for(const auto& str : caminhoCompleto)
+    {
+
+        if (strcmp(str.c_str(), "/") == 0)
+        {
+            enderecoInodeGravacao = cd(disco, enderecoInodeGravacao, str.c_str(), enderecoInodeRaiz, caminhoAux);
+        }
+        else{
+            //verifico se o arquivo atual não é o último do caminho. No último, vai ser o diretório que irei criar
+            if (i < caminhoCompleto.size()-1)
+            {
+                //verifico se o endereço é nulo, se for, não há como gravar
+                if(isEnderecoNull(existeArquivoOuDiretorio(disco, enderecoInodeGravacao, str.c_str())))
+                {
+                    possivelInserir = false;
+                    break;
+                }
+            }
+            enderecoInodeGravacao = cd(disco, enderecoInodeGravacao, str.c_str(), enderecoInodeRaiz, caminhoAux);
+        }
+        i++;
+    }
+
+    if (possivelInserir && isEnderecoValido(enderecoInodeGravacao))
+    {
+        if (lastPosition(caminhoCompleto).size() <= MAX_NOME_ARQUIVO)
+        {
+            strcpy(nomeDiretorio, lastPosition(caminhoCompleto).c_str());
+            return addDiretorioEArquivo(disco, 'd', enderecoInodeGravacao, nomeDiretorio);
+        }
+    }
+    
+    return getEnderecoNull();
 }

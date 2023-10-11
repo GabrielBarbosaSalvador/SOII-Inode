@@ -20,6 +20,26 @@ vector<string> split(string stringPrincipal, char delimitador=' ')
     return retorno;
 }
 
+vector<string> splitPath(string stringPrincipal)
+{
+    vector<string> caminhoOrigem;
+
+    if(stringPrincipal.at(0) == '/') {
+        caminhoOrigem.push_back("/");
+
+        for(const string& elem : split(stringPrincipal, '/')) 
+        {
+            if (strcmp(elem.c_str(), "") != 0)
+                caminhoOrigem.push_back(elem);
+        }
+    }
+    else {
+        caminhoOrigem = split(stringPrincipal, '/');
+    }
+
+    return caminhoOrigem;
+}
+
 string lastPosition(vector<string> vector)
 {
     return vector.at(vector.size()-1);

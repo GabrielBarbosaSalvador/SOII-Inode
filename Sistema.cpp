@@ -74,7 +74,7 @@ void execucaoSistema(Disco disco[], int quantidadeBlocosTotais, int enderecoInod
             {
                 strcpy(nomeDiretorio, comando.substr(6).c_str()); 
                 
-                if (isEnderecoValido(addDiretorioEArquivo(disco, 'd', enderecoInodeAtual, nomeDiretorio)))
+                if (isEnderecoValido(mkdir(disco, enderecoInodeAtual, enderecoInodeRaiz, nomeDiretorio)))
                 {
                     printf("Diretorio criado\n");
                 }
@@ -108,7 +108,7 @@ void execucaoSistema(Disco disco[], int quantidadeBlocosTotais, int enderecoInod
             strcpy(touchString, comando.substr(6).c_str());
 
             if (comando.size() > 6)
-                if(touch(disco, enderecoInodeAtual, touchString))
+                if(touch(disco, enderecoInodeAtual, enderecoInodeRaiz, touchString))
                     printf("Arquivo criado\n");
                 else {
                     textcolor(RED);
@@ -296,8 +296,8 @@ int main()
     /*no início do sistema, deve ser informado pelo usuário a quantidade total de discos que haverá */
     /*deve ser possível executar o comando ls -l*/
     
-    // iniciarAParada();
-    // getch();
+    iniciarAParada();
+    getch();
     
     system("cls");
     
