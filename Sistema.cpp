@@ -53,6 +53,9 @@ void execucaoSistema(Disco disco[], int quantidadeBlocosTotais, int enderecoInod
             {
                 listarDiretorioComAtributos(disco, enderecoInodeAtual);
             }
+            else if (comando.size() >= 5 && strcmp(comando.substr(3).c_str(), "-e") == 0){
+                listaDiretorioAtualIgualExplorer(disco, enderecoInodeAtual);
+            }
             else
             {
                 listarDiretorio(disco, enderecoInodeAtual);
@@ -214,6 +217,13 @@ void execucaoSistema(Disco disco[], int quantidadeBlocosTotais, int enderecoInod
                 }
             }
         }
+        else if (strcmp(comando.substr(0, 8).c_str(), "max file") == 0)
+        {
+            int quantidadeBlocosDisponiveis = getQuantidadeBlocosLivres(disco);
+            int quantidadeTotal = getQuantidadeBlocosMaiorArquivo(disco, quantidadeBlocosDisponiveis);
+            printf("Pode ser usado [%d] blocos para inserir um arquivo", quantidadeTotal);
+        }
+
         textcolor(GREEN);
         printf("root@localhost");
         textcolor(WHITE);
