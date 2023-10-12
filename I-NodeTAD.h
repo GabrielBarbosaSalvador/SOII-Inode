@@ -14,7 +14,7 @@ using namespace std;
 
 #define MAX_NOME_ARQUIVO 14
 #define DIRETORIO_LIMITE_ARQUIVOS 10
-#define MAX_INODEINDIRETO 8
+#define MAX_INODEINDIRETO 5
 #define ENDERECO_CABECA_LISTA 0
 #define QUANTIDADE_LIMITE_ENDERECO_LISTA_BLOCO_LIVRE 10
 #define PERMISSAO_PADRAO_DIRETORIO 755
@@ -2057,9 +2057,9 @@ bool touch(Disco disco[], int enderecoInodeAtual, int enderecoInodeRaiz, char co
     int endereco = getEnderecoNull();
     vector<string> vetorStringSeparado = split(comandoString, ' ');
 
-    if (vetorStringSeparado.size() == 2 && vetorStringSeparado.at(0).size() <= MAX_NOME_ARQUIVO)
+    if (vetorStringSeparado.size() == 2 && lastPosition(split(vetorStringSeparado.at(0), '/')).size() <= MAX_NOME_ARQUIVO)
     {
-        char nomeArquivo[MAX_NOME_ARQUIVO];
+        char nomeArquivo[vetorStringSeparado.at(0).size() + 1];
         strcpy(nomeArquivo, vetorStringSeparado.at(0).c_str());
         int tamanhoArquivo = atoi(vetorStringSeparado.at(1).c_str());
 

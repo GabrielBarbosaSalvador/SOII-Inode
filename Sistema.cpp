@@ -68,13 +68,13 @@ void execucaoSistema(Disco disco[], int quantidadeBlocosTotais, int enderecoInod
         }
         else if (strcmp(comando.substr(0, 5).c_str(), "mkdir") == 0)
         {
-            char nomeDiretorio[MAX_NOME_ARQUIVO];
+            char comandoEnvio[comando.size() + 1];
             
             if (comando.size() >= 6)
             {
-                strcpy(nomeDiretorio, comando.substr(6).c_str()); 
+                strcpy(comandoEnvio, comando.substr(6).c_str()); 
                 
-                if (isEnderecoValido(mkdir(disco, enderecoInodeAtual, enderecoInodeRaiz, nomeDiretorio)))
+                if (isEnderecoValido(mkdir(disco, enderecoInodeAtual, enderecoInodeRaiz, comandoEnvio)))
                 {
                     printf("Diretorio criado\n");
                 }
@@ -104,7 +104,7 @@ void execucaoSistema(Disco disco[], int quantidadeBlocosTotais, int enderecoInod
         }
         else if (strcmp(comando.substr(0, 5).c_str(), "touch") == 0)
         {
-            char touchString[300];
+            char touchString[comando.size()+1];
             strcpy(touchString, comando.substr(6).c_str());
 
             if (comando.size() > 6)
