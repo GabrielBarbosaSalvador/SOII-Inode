@@ -1,5 +1,5 @@
 # Kause Linux - Trabalho prático de SO II
-Trabalho criado para compreender o funcionamento de um I-Node em sistemas operacionais Linux, além de sua implementação
+Este trabalho foi concebido com o propósito de aprofundar a compreensão acerca do funcionamento do I-Node e da gestão de blocos de disco em sistemas operacionais Linux. A abordagem adotada envolve a exploração prática desses conceitos, além da implementação efetiva, ou próxima à realidade, utilizando as linguagens de programação C++ e C.
 
 Este projeto prático tem como finalidade realizar a simulação referente a implementação do Sistema de 
 Arquivos utilizado Inode.
